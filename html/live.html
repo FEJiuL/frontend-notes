@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>计时器</title>
+	<style type="text/css">
+	body{ background-color: #323a45;  }
+
+		#app{
+			box-sizing: border-box; margin: 250px auto; 
+		}
+		*{ font-size: 14px; color: #666;  }
+		.block{ 
+			position: relative; width: 400px; height: 300px; margin: 16px auto 0; font-size: 20px; font-weight: 500; text-align: center; 
+		}
+		.card{  
+			position: relative; width: 400px; height: 270px; border-radius: 10px; background-color: #ff5c54; box-shadow: 3px 3px 0px 3px #b2413b; z-index: 2; 
+			text-shadow : 2px 2px 0 #b2413b;
+		}
+		.shadow{ 
+			position: absolute; left: 0; top: 0; width: 480px; height: 300px; transform: translateY(111px) translateX(46px) rotateZ(-34deg); z-index: 0;
+			background: -webkit-linear-gradient(-90deg, #242b35, #323a45); 
+		}
+/*		.block:after{ 
+			content: ""; display: block; position: absolute; left: 0; top: 0; width: 460px; height: 300px; 
+			background: -webkit-linear-gradient(-90deg, #242b35, #323a45); 
+			transform: translateY(100px) translateX(260px) skewX(60deg); z-index: 0
+		} 
+		.block:before{ 
+			content: ""; display: block; position: absolute; left: 0; top: 0; width: 200px; height: 100px; 
+			background: -webkit-linear-gradient(0deg, #242b35, #323a45); 
+			transform: translateX(460px) translateY(58px) skewY(30deg); z-index: 0
+		} */
+		.block .title{ color: #fff; margin: 0; line-height: 2.8em; font-size: 40px; font-weight: lighter; }
+		.block .timer{ font-size: 34px; color: #fff; font-weight: lighter;}
+		.block .timer em{ display: inline-block; padding: 0 6px; color: #fff; font-size: 14px; font-style: normal; }
+	</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="text/javascript">
+
+
+	const birthday = "2017-04-08 23:59:00";
+
+	const createLiveBlock = ( birthday, title = "计时器" ) => {
+
+		const mianDom = document.createElement("div");	//主容器
+		const cardDom = document.createElement("div");
+		const txtDom = document.createElement("div");	//计时容器
+		const titDom = document.createElement("h2");	//标题容器	
+		const shadowDom = document.createElement("div"); //
+
+		//设置样式
+		mianDom.setAttribute("class", "block");
+		cardDom.setAttribute("class", "card");
+		txtDom.setAttribute("class", "timer");
+		titDom.setAttribute("class", "title");
+		shadowDom.setAttribute("class", "shadow");
+
+		//添加内容
+		titDom.innerHTML = title;
+		cardDom.appendChild( titDom );
+		cardDom.appendChild( txtDom );
+		mianDom.appendChild( cardDom );
+		mianDom.appendChild( shadowDom );
+
+		//挂载到app节点
+		document.getElementById("app").appendChild( mianDom );
+
+		//添加计时器
+		return setInterval(() => {
+			txtDom.innerHTML = getLiveTime.apply(null, birthday.split(" "));
+		}, 1000);
+
+	}
+
+	//已过秒数
+	const getLiveSecond = ( start, end ) => {
+		return Math.floor( (end - start) / 1000 );
+	}
+
+	//已过分钟数
+	const getLiveRemainderMinute = ( second ) => {
+		return Math.floor( second / 60 ) % 60;
+	}
+
+	//已过小时数
+	const getLiveRemainderHour = ( second ) => {
+		return Math.floor( second / 3600 ) % 24;
+	}
+
+	//已过天数
+	const getLiveRemainderDate = ( prev, now ) => {
+		//上个月生日日期距本月生日日期天数计算
+		const prevDate = new Date( prev );
+		const diff = now - prevDate;
+		return Math.floor( diff / 86400000 );
+	} 
+
+	//获取上个月生日日期
+	const getPrevBirthDate = (year, month, date, birthDate, time = "00:00:00") => {
+		//判断是否已过生日日期
+		if( date >= birthDate ) {
+			return `${ year }-${ month }-${ birthDate } ${time}`;
+		} else {
+			//判断是否跨年
+			if( month == 1 ) month = 12, year -= 1;
+			else month -= 1;
+			const total = new Date(year, month, 0).getDate(); 	//获取当前月份总天数
+			total < birthDate && ( birthDate = total );			//判断生日日期是否大于当月总天数
+			return  `${ year }-${ month }-${ birthDate } ${time}`;
+		}
+	}
+
+	const cover = ( num, len = 2 ) => {
+		const str = new Array(len).join("0");
+		return `${str}${num}`.slice(-len);
+	};
+
+	const getLiveTime = ( birthday, time = "00:00:00" ) => {
+
+		const birth = new Date( `${birthday} ${time}` );
+		const now = new Date();
+		const second = getLiveSecond( birth, now ); //获取以生存秒数
+
+		//生日日期	
+		const birthYear = birth.getFullYear();
+		const birthMonth = birth.getMonth() + 1;
+		const birthDate = birth.getDate();
+
+		//今天日期
+		const nowYear = now.getFullYear();
+		const nowMonth = now.getMonth() + 1;
+		const nowDate = now.getDate();
+
+		//是否已过生日
+		const isBirth = nowMonth > birthMonth || ( nowMonth == birthMonth && nowDate >= birthDate );
+
+		//已过年数
+		const year = nowYear - birthYear - ( isBirth ? 0 : 1 );
+		//已过月数
+		const month = (isBirth ? ( nowMonth - birthMonth ) : ( 12 - birthMonth + nowMonth )) - ( birthDate > nowDate ? 1 : 0 );
+		//获取上月生日日期
+		const prevDate = getPrevBirthDate(nowYear, nowMonth, nowDate, birthDate, time);	
+		//已过天数
+		const date = getLiveRemainderDate(prevDate, now);
+		//已过小时数
+		const hour = getLiveRemainderHour( second );
+		//已过分钟数
+		const minute = getLiveRemainderMinute( second )
+
+		return `${year}<em>Years</em>${ cover(month) }<em>Months</em>${ cover(date) }<em>Days</em><br />${ cover(hour) }<em>Huors</em>${ cover(minute) }<em>Minutes</em>${ cover(second % 60) }<em>Seconds</em>`;
+	}
+
+	const main = ( birthday ) => {
+		return createLiveBlock( birthday, "Live Time" );
+	}
+
+	// main( "1993-11-24" );
+	main( birthday );
+	// main("2017-04-08 23:28:00");
+	// main("2018-05-26 09:22:30");
+
+</script>
+</body>
+</html>
