@@ -41,7 +41,6 @@ class Ajax {
         this.isParse = false;
         this.type = 'GET';
         this.params = {};
-        this.closePop = '';
     }
     init( opts ) {
         this.propertys();
@@ -136,7 +135,6 @@ class Ajax {
 
         return axios(options).then((res) => {
             let { data = { } } = res;
-            this.closePop && this.closePop();
             return handle(str, this.parse(data));            //数据过滤处理
         }).catch( failure );
 
