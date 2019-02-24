@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<script type="text/javascript">
+
+//获取随机正整数
+const getRandomNum = (start, end) => {
+	let range = end - start;
+	let num = Math.floor(Math.random() * range);
+	return start + num; 
+}
+
+//洗牌算法	
+const shuffle = ( list = [] ) => {
+	let len = list.length;
+	for( let i = len - 1; i > 0; i-- ){
+		let k = getRandomNum(0, i);
+    let [list[i], list[k] = [list[k], list[i]];
+	}
+	console.log(list); //已排序后的卡牌
+	return list;
+}
+
+
+let cards = ['A', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+//生成56张牌堆
+cards = cards.reduce((arr, key) => {
+	return arr.concat(`♣️${key}`, `♠️${key}`, `♥️${key}`, `♦️${key}`);
+}, []);
+
+shuffle(shuffle(shuffle(cards)));
+
+</script>
+</body>
+</html>
