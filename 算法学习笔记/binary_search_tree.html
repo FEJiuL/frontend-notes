@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<script type="text/javascript">
+
+// tree node 构造函数
+function TreeNode(val){
+	this.val = val;
+	this.left = this.right = null;
+}
+
+//根据数组生成树结构
+function creatTree ( list ){
+
+	if( list < 1 ) return null;
+
+	let tree = new TreeNode(list.shift());
+
+	let arr = [ tree ];
+
+	function creatNode( val ){
+		if( val !== null && val !== undefined) 
+			return new TreeNode(val)
+		return null;
+	}
+
+	while(arr.length > 0){
+		let node = arr.shift();
+		node.left = creatNode( list.shift() );
+		node.right = creatNode( list.shift() );
+		if( node.left ) arr.push(node.left);
+		if( node.right ) arr.push(node.right);
+	}
+	return tree;
+}
+
+
+//BFS 宽度优先搜索
+
+let BFS = ( tree ) => {
+	let arr = [tree], paths = [ ];
+	while( arr.length > 0){
+		let node = arr.shift();
+		paths.push(node.val);   //记录搜索路径
+		if( node.left ) arr.push(node.left);
+		if( node.right ) arr.push(node.right);
+	}
+	return paths;
+}
+
+//DFS 深度优先搜索
+
+let DFS = ( node, paths ) => {
+	if( !node ) return;
+	paths.push(node.val);		//记录搜索路径
+	if( node.left ) DFS(node.left, paths);
+	if( node.right ) DFS(node.right, paths);
+	return paths;
+}
+
+let arr = [1,2,null, 5,9,null,12,0,23,21,221,5564,4567,2435,123];
+let tree = creatTree(arr);
+let dfs = DFS(tree, []);
+let bfs = BFS(tree);
+console.log(bfs)
+console.log(dfs)
+
+</script>
+</body>
+</html>
