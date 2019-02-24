@@ -18,7 +18,7 @@ const shuffle = ( list = [] ) => {
 	let len = list.length;
 	for( let i = len - 1; i > 0; i-- ){
 		let k = getRandomNum(0, i);
-    let [list[i], list[k] = [list[k], list[i]];
+    let [list[i], list[k]] = [list[k], list[i]];
 	}
 	console.log(list); //已排序后的卡牌
 	return list;
