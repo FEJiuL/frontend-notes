@@ -29,7 +29,7 @@
 		}
 	}
 
-	//测试防抖函数(模拟100次随机触发事件)
+	//测试防抖函数(模拟count次随机触发事件)
 	let testDebounce = ( count = 100 ) => {
 
 		let wait = 110, start = 60, end = 120, total = 0;
@@ -56,7 +56,7 @@
 		}
 	}
 
-	//防抖函数测试
+	//测试节流函数(模拟count次触发)
 	let testThrottle = ( count ) => {
 
 		let wait = 300, start = 50, end = 70, total = 0;
