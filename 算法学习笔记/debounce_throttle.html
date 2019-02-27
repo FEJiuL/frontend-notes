@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<script type="text/javascript">
+	
+	//生成指定范围随机数
+	let randomNum = (start, end) => {
+		let range = end - start;
+		let num = Math.random() * range;
+		return start + Math.floor(num);
+	}
+
+	//防抖函数
+	let debounce = ( func, wait = 100, immediate ) => {
+		let timer;
+		return ( ...rest ) => {
+			if( timer === undefined && immediate ){
+				func.apply(null, rest);
+			}
+			clearTimeout( timer );  //清楚定时器
+			timer = setTimeout(( ...args ) => {
+				if( !immediate ) 
+					func(...args);
+				timer = undefined;
+			}, wait, ...rest);	//添加延时执行事件
+		}
+	}
+
+	//测试防抖函数(模拟100次随机触发事件)
+	let testDebounce = ( count = 100 ) => {
+
+		let wait = 110, start = 60, end = 120, total = 0;
+
+		let cbfun = debounce((time, i) => console.log(`第${i}触发时间间隔`, time), wait, true);
+
+		for( let i = 0; i < count; i++ ){
+			let num = randomNum(start, end);
+			total += num;
+			setTimeout(cbfun, total, num, i);
+		}
+	}
+
+
+	//throttle 节流函数
+	let throttle = ( func, wait ) => {
+		let timer;
+		return ( ...rest ) => {
+			if( timer ) return;
+			timer = setTimeout(() => {
+				timer = undefined;
+			}, wait)
+			func.apply(null, rest);
+		}
+	}
+
+	//防抖函数测试
+	let testThrottle = ( count ) => {
+
+		let wait = 300, start = 50, end = 70, total = 0;
+		let cbfun = throttle((time, i) => console.log(`第${i}触发时间`, time), wait);
+
+		for( let i = 0; i < count; i++ ){
+			let num = randomNum(start, end);
+			total += num;
+			setTimeout(cbfun, total, total, i);
+		}
+	}
+</script>
+</body>
+</html>
