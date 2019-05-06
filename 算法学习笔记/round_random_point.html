@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>模拟刺激战场缩圈</title>
+	<style type="text/css">
+		.main{
+			position: relative;
+			width: 800px;
+			height: 800px;
+			margin: 60px auto;
+			border: 1px solid #eee;
+			background-color: #e1ebff;
+		}
+		.circle{
+			position: absolute;
+			border-radius: 100%;
+			background-color: #ccc;
+			transition: all 0.18s;
+		}
+		#curr{
+			background-color: rgba(95, 95, 95, 0.3);
+		}
+		#next{
+			background-color: rgba(30, 30, 30, 0.3);
+			/*background-color: #000;*/
+			border: 1px dashed #666;
+		}
+	</style>
+</head>
+<body>
+<div class="main" id="map">
+	<div class="circle" id="next"></div>	
+	<div class="circle" id="curr"></div>
+</div>
+<script type="text/javascript">
+	
+	$curr = document.getElementById("curr");
+	$next = document.getElementById("next");
+
+	let arrs = [700, 600, 500, 400, 300, 200, 100, 50, 20, 10];
+	let prevX = 400, prevY = 400;
+
+	//生成随机数
+	const randomNum = (start, end) => {
+		let range = end - start;
+		return Math.random() * range + start;
+	}
+
+
+	//等概率的随机选取圆形区域内的一点(核心算法)
+	const getCoord = (radius) => {
+		let angle = Math.random() * 2 * Math.PI;
+		let r = Math.random() * Math.pow(radius,  2) ;
+		let x = Math.sqrt(r) * Math.sin(angle);
+		let y = Math.sqrt(r) * Math.cos(angle);
+		return [prevX - x, prevY - y];
+	}
+
+	//设置元素属性
+	const setAttr = ($ele, diameter, x, y) => {
+		$ele.style.top = `${y}px`;
+		$ele.style.left = `${x}px`;
+		$ele.style.width = `${diameter}px`;
+		$ele.style.height = `${diameter}px`;
+	}
+
+	const create = (curr, next) => {
+		let radius = (curr - next) / 2;
+		const [x, y] = getCoord(radius);
+		setAttr($curr, curr, prevX - curr / 2, prevY - curr / 2);
+		setTimeout(() => setAttr($next, next, x - next / 2, y - next / 2), 400);
+		prevX = x, prevY = y;
+	}
+
+	//缩圈变化
+	const change = (time = 1000, curr, next) => {
+		setTimeout(create, time, curr, next);
+	}
+
+	//主函数
+	const main = () => {
+		let diameter = 800;
+		setAttr($curr, diameter, prevX - 400, prevY - 400);
+		return arrs.reduce((t, n) => {
+			t += Math.floor(randomNum(1000, 5000));
+			change(t, diameter, n);
+			diameter = n;
+			return t;
+		}, 0)
+	}
+
+	main();
+
+</script>
+</body>
+</html>
