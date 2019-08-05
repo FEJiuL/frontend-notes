@@ -15,6 +15,9 @@ export default class ScrollView extends PureComponent {
     isMore: false,
   };
   componentDidMount() {
+    this.addScrollEvent()
+  }
+  addScrollEvent(){
     //添加滚动监听
     if (this.props.isMore) {
       const handle = this.scrollHandle();
@@ -24,8 +27,10 @@ export default class ScrollView extends PureComponent {
     }
   }
   componentDidUpdate() {
-    if (!this.props.isMore) {
-      this.removeScrollEvent();
+    if(!this.removeScrollEvent){
+      this.addScrollEvent()
+    }else if(!this.props.isMore){
+      this.removeEventListener()
     }
   }
   scrollHandle = () => {
@@ -50,7 +55,7 @@ export default class ScrollView extends PureComponent {
   }
   componentWillUnmount() {
     //卸载滚动监听
-    this.removeScrollEvent();
+    this.removeScrollEvent && this.removeScrollEvent();
   }
   render() {
     const {loading, isMore, renderAnchor} = this.props;
