@@ -35,7 +35,7 @@ export default class ScrollView extends PureComponent {
   }
   scrollHandle = () => {
     return (e) => {
-      this.isSole() && !this.props.loading && this.props.scrollChange();
+      !this.props.loading && this.isSole() && this.props.scrollChange();
     };
   };
   isSole(threshold = 20) {
