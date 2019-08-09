@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>选择排序</title>
+</head>
+<body>
+<script type="text/javascript">
+	
+	const randomNum = (start = 0, end = 1) => {
+		const range = end - start;
+		return start + Math.random() * range;
+	}
+
+	const generateList = (len = 100) => {
+		let arr = []
+		for(let i = 0; i < len; i++){
+			let num = Math.floor(randomNum(0, len * 10))
+			arr.push(num)
+		}
+		return arr;
+	}
+
+	//选择排序（时间复杂度：O(n^2)）
+	const selectionSort = (list) => {
+		for(let i = 0; i < list.length; i++){
+			let idx = i, max = list[i];
+			for(let k = i; k < list.length; k++){
+				if(list[k] > max){
+					idx = k;
+					max = list[k]
+				}
+			}
+			[list[i], list[idx]] = [list[idx], list[i]]
+		}
+		return list;
+	}
+
+	const testCase = () => {
+		let list = generateList(20)
+		return selectionSort(list)
+	}
+</script>
+</body>
+</html>
