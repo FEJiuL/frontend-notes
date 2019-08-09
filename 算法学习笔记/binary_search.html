@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>算法学习</title>
+</head>
+<body>
+<script type="text/javascript">
+
+	//获取随机整数
+	const randomNum = (start = 0, end) => {
+		let range = end - start;
+		return start + Math.floor(Math.random() * range)
+	}
+
+	//生成有序列表
+	const generateList = (len = 20) => {
+		let arr = []
+		while(len-- > 0){
+			let num = randomNum(0, len * 100)
+			arr.push(num);
+		}
+		return arr.sort((a, b) => a - b);
+	}
+
+	//二分查找
+	const binarySearch = (list, val) => {
+		let left = 0;
+		let right = list.length - 1;
+		while( left <= right){
+			let mid = (left + right) >> 1;
+			let guess = list[mid]
+			if(guess == val)
+				return mid;
+			else if(guess > val)
+				right = mid - 1;
+			else 
+				left = mid + 1;
+		}
+		return null;
+	}
+
+	//测试用例
+	const testCase = () => {
+		let list = generateList(100);
+		let idx = randomNum(0, 100);
+		let val = list[idx];
+		let res = binarySearch(list, val)
+		console.log(list)
+		return `查找值：${val},索引：${res}`
+	}
+</script>
+</body>
+</html>
