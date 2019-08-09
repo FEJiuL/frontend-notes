@@ -35,9 +35,35 @@
 		return list;
 	}
 
+	//快速排序算法
+	const quickSort = (list) => {
+		for(let i = 0; i < list.length; i++){
+			for(let k = 1; k < list.length; k++){
+				if(list[k] < list[k-1]){
+					[list[k], list[k-1]] = [list[k-1], list[k]]
+				}
+			}
+		}
+		return list;
+	}
+
+	//插入排序 （时间复杂度：O(n^2)）
+	const insertionSort = (list) => {
+		for(let i = 0; i < list.length; i++){
+			for(let k = 0; k < i; k++){
+				if(list[k] > list[i]){
+					let [val] = list.splice(i, 1)
+					list.splice(k, 0, val)
+					break;
+				}
+			}
+		}
+		return list;
+	}
+
 	const testCase = () => {
 		let list = generateList(20)
-		return selectionSort(list)
+		return quickSort(list)
 	}
 </script>
 </body>
