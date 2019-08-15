@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>扫雷游戏</title>
+	<style type="text/css">
+		.map{
+			width: 900px;
+			height: 480px;
+			margin: 120px auto;
+			outline: 1px solid #ccc;
+		    display: flex;
+		    flex-wrap: wrap;
+		    justify-content: flex-start;
+		}
+		.box{
+			width: 30px;
+			height: 30px;
+			background-color: #2196f3;
+			outline: 1px solid #ccc;
+			color: #fff;
+			text-align: center;
+			line-height: 30px;
+		}
+		.box[type="0"]{
+			background-color: #fff;
+			color: #666
+		}
+		.box[type="x"]{
+			background-color: #f44336;
+			color: #fff;
+		}
+		.box[type="1"],
+		.box[type="2"],
+		.box[type="3"],
+		.box[type="4"],
+		.box[type="5"],
+		.box[type="6"]
+		.box[type="7"]
+		.box[type="8"]{
+			background-color: #2196f3;
+			color: #fff;
+		}
+	</style>
+</head>
+<body>
+<div class="map" id="map"></div>
+<script type="text/javascript">
+	let width = 30;  //图宽
+	let height = 16; //图高
+	let landmine = 90; //雷数
+
+	const randomNum = (start, end) => {
+		let rg = end - start;
+		return Math.floor(Math.random() * rg) + start;
+	}
+
+	//随机生成雷区
+	const generateLandMine = (len, map, w, h) => {
+		for(let i = 0; i < len; i++){
+			let x = randomNum(0, w);
+			let y = randomNum(0, h);
+			map[y][x] = 'x';
+		}
+		return map;
+	}
+
+	//扫描当前位置8个方向
+	const scanAround = (map, x, y) => {
+		let sum = 0;
+		if(x - 1 >= 0){
+			if(map[x-1][y] == 'x')
+				sum += 1
+			if(y - 1 >= 0 && map[x-1][y-1] == 'x')
+				sum += 1;
+			if(y + 1 < width && map[x-1][y+1] == 'x')
+				sum += 1;
+		}
+		if(x + 1 < height){
+			if(map[x+1][y] == 'x')
+				sum += 1
+			if(y - 1 >= 0 && map[x+1][y-1] == 'x')
+				sum += 1;
+			if(y + 1 < height && map[x+1][y+1] == 'x')
+				sum += 1;
+		}
+		if((y + 1 < height && map[x][y+1] == 'x') || (y-1 >= 0 && map[x][y-1] == 'x'))
+			sum += 1;
+		map[x][y] = sum;
+	}
+
+	//生成扫雷地图
+	const generateGameMap = (w, h) => {
+		let map = [];
+		for(let i = 0; i < h; i++){
+			let row = new Array(w).fill(0)
+			map.push(row);
+		}
+		map = generateLandMine(90, map, w, h);  //添加雷区
+		for(let x = 0; x < h; x++){
+			for(let y = 0; y < w; y++){
+				if(map[x][y] !== 'x')
+					scanAround(map, x, y);
+			}
+		}
+		return map;
+	}
+
+	const main = () => {
+		let $root = document.getElementById('map');
+		let list = generateGameMap(width, height);
+		let html = '';
+		for(let i = 0; i < height; i++){
+			for(let j = 0; j < width; j++){
+				html += `<div class="box" type="${list[i][j]}">${list[i][j]}</div>`
+			}
+		}
+		$root.innerHTML = html;
+	}
+
+	main()
+
+</script>
+</body>
+</html>
