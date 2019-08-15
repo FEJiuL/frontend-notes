@@ -67,23 +67,29 @@
 	//扫描当前位置8个方向
 	const scanAround = (map, x, y) => {
 		let sum = 0;
+		//上
 		if(x - 1 >= 0){
-			if(map[x-1][y] == 'x')
+			if(map[x - 1][y] == 'x')
 				sum += 1
-			if(y - 1 >= 0 && map[x-1][y-1] == 'x')
+			if(y - 1 >= 0 && map[x - 1][y - 1] == 'x')
 				sum += 1;
-			if(y + 1 < width && map[x-1][y+1] == 'x')
+			if(y + 1 < width && map[x - 1][y + 1] == 'x')
 				sum += 1;
 		}
+		//下
 		if(x + 1 < height){
-			if(map[x+1][y] == 'x')
+			if(map[x + 1][y] == 'x')
 				sum += 1
-			if(y - 1 >= 0 && map[x+1][y-1] == 'x')
+			if(y - 1 >= 0 && map[x + 1][y - 1] == 'x')
 				sum += 1;
-			if(y + 1 < height && map[x+1][y+1] == 'x')
+			if(y + 1 < width && map[x + 1][y + 1] == 'x')
 				sum += 1;
 		}
-		if((y + 1 < height && map[x][y+1] == 'x') || (y-1 >= 0 && map[x][y-1] == 'x'))
+		//右
+		if(y + 1 < width && map[x][y + 1] == 'x')
+			sum += 1;
+		//左
+		if(y - 1 >= 0 && map[x][y - 1] == 'x')
 			sum += 1;
 		map[x][y] = sum;
 	}
