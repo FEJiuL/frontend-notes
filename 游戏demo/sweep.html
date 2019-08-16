@@ -15,6 +15,7 @@
 		.box{
 			width: 30px;
 			height: 30px;
+			position: relative;;
 			background-color: #2196f3;
 			outline: 1px solid #ccc;
 			color: #fff;
@@ -34,20 +35,68 @@
 		.box[type="3"],
 		.box[type="4"],
 		.box[type="5"],
-		.box[type="6"]
-		.box[type="7"]
+		.box[type="6"],
+		.box[type="7"],
 		.box[type="8"]{
 			background-color: #2196f3;
 			color: #fff;
+		}
+		.box[type="x"]:before,
+		.box[type="1"]:before,
+		.box[type="2"]:before,
+		.box[type="3"]:before,
+		.box[type="4"]:before,
+		.box[type="5"]:before,
+		.box[type="6"]:before,
+		.box[type="7"]:before,
+		.box[type="8"]:before{
+			content: attr(type);
+		}
+		.box[id]{
+			background-color: #9e9e9e;
+			color: #9e9e9e;
+		}
+		.box[sign]{
+			background-color: #f44336;
+			color: #f44336;
 		}
 	</style>
 </head>
 <body>
 <div class="map" id="map"></div>
 <script type="text/javascript">
+
 	let width = 30;  //图宽
 	let height = 16; //图高
 	let landmine = 90; //雷数
+
+	let $map = document.getElementById("map");
+
+	const clickHandle = (e) => {
+		let target = e.target;
+		let className = target.getAttribute('class');
+		let id = target.getAttribute('id');
+		if(className == 'box' && id){
+			let [x, y] = id.split('_')[1].split('-');
+			click(+x, +y)  //注意数据类型（坑）
+		}
+	}
+
+	//绑定点击事件
+	$map.addEventListener('click', clickHandle);
+	$map.oncontextmenu = (e) => e.preventDefault(); //禁用右键菜单
+	$map.onmouseup = (e) => {
+		if(e.button == 2){ //表示右击
+			let target = e.target;
+			let className = target.getAttribute('class');
+			let id = target.getAttribute('id');
+			if(className == 'box' && id){
+				let sign = target.getAttribute('sign');
+				sign ? target.removeAttribute('sign') :
+					target.setAttribute('sign', '1')
+			}
+		}	
+	}
 
 	const randomNum = (start, end) => {
 		let rg = end - start;
@@ -56,10 +105,16 @@
 
 	//随机生成雷区
 	const generateLandMine = (len, map, w, h) => {
+		let cache = new Set(); //去重
 		for(let i = 0; i < len; i++){
 			let x = randomNum(0, w);
 			let y = randomNum(0, h);
-			map[y][x] = 'x';
+			cache.add(`${x}${y}`);
+			if(cache.size == i + 1){
+				map[y][x] = 'x';
+			} else {
+				i -= 1;
+			}
 		}
 		return map;
 	}
@@ -67,7 +122,7 @@
 	//扫描当前位置8个方向
 	const scanAround = (map, x, y) => {
 		let sum = 0;
-		//上
+		//上/左上/右上
 		if(x - 1 >= 0){
 			if(map[x - 1][y] == 'x')
 				sum += 1
@@ -76,7 +131,7 @@
 			if(y + 1 < width && map[x - 1][y + 1] == 'x')
 				sum += 1;
 		}
-		//下
+		//下/左下/右下
 		if(x + 1 < height){
 			if(map[x + 1][y] == 'x')
 				sum += 1
@@ -101,7 +156,7 @@
 			let row = new Array(w).fill(0)
 			map.push(row);
 		}
-		map = generateLandMine(90, map, w, h);  //添加雷区
+		map = generateLandMine(landmine, map, w, h);  //添加雷区
 		for(let x = 0; x < h; x++){
 			for(let y = 0; y < w; y++){
 				if(map[x][y] !== 'x')
@@ -111,20 +166,76 @@
 		return map;
 	}
 
+
 	const main = () => {
-		let $root = document.getElementById('map');
-		let list = generateGameMap(width, height);
+		let map = generateGameMap(width, height);
+		$map.innerHTML = render(map);
+	}
+
+	const render = (map) => {
 		let html = '';
 		for(let i = 0; i < height; i++){
 			for(let j = 0; j < width; j++){
-				html += `<div class="box" type="${list[i][j]}">${list[i][j]}</div>`
+				html += `<div class="box" id="box_${i}-${j}" type="${map[i][j]}"></div>`
 			}
 		}
-		$root.innerHTML = html;
+		return html;
 	}
 
-	main()
+	const getNode = (x, y) => {
+		let id = `box_${x}-${y}`;
+		return document.getElementById(id);
+	}
 
+	//扫描当前位置8个方向是否可打开
+	const scanAroundClick = (x, y) => {
+		//上/左上/右上
+		if(x - 1 >= 0){
+			if(getNode(x - 1, y))
+				click(x - 1, y)		
+			if(y - 1 >= 0 && getNode(x - 1, y - 1))
+				click(x - 1, y - 1)
+			if(y + 1 < width && getNode(x - 1, y + 1))
+				click(x - 1, y + 1)
+		}
+		//下/左下/右下
+		if(x + 1 < height){
+			if(getNode(x + 1, y))
+				click(x + 1, y)
+			if(y - 1 >= 0 && getNode(x + 1, y - 1))
+				click(x + 1, y - 1)
+			if(y + 1 < width && getNode(x + 1, y + 1))
+				click(x + 1, y + 1)
+		}
+		//右
+		if(y + 1 < width && getNode(x, y + 1))
+			click(x, y + 1)	
+		//左
+		if(y - 1 >= 0 && getNode(x, y - 1))
+			click(x, y - 1)	
+	}
+
+	const click = (x, y) => {
+		let $node = getNode(x, y)
+		if($node){
+			$node.removeAttribute('id');
+			let type = $node.getAttribute('type');
+			if(type == '0')
+				scanAroundClick(x, y);
+			else if(type == 'x'){
+				alert('游戏结束')
+				main()
+			}
+		}
+	}
+
+	main();
+
+	const test = (x, y) => {
+		x = isNaN(x) ? randomNum(0, height) : x;
+		y = isNaN(y) ? randomNum(0, width) : y;
+		click(x, y)
+	}
 </script>
 </body>
 </html>
