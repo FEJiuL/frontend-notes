@@ -86,10 +86,10 @@ class Card{
     constructor( type, val ){
         this.type = type;
         this.val = val;
-        this.count = this.getCount(val);
+        this.count = this.getCount();
     }
-    getCount( val ){
-        switch(val){
+    getCount(){
+        switch(this.val){
             case 'A' :
                 return 1;
             case 'J':
