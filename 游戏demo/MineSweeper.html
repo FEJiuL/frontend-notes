@@ -57,6 +57,7 @@
 			color: #9e9e9e;
 		}
 		.box[sign]{
+			position: relative;
 			background-color: #f44336;
 			color: #f44336;
 		}
@@ -74,183 +75,168 @@
 </div>
 <script type="text/javascript">
 
-	let width = 30;  //图宽
-	let height = 16; //图高
-	let landmine = 90; //雷数
-	let num = 0;  //已排雷数
-	let $map = document.getElementById("map");
-	let $btn = document.getElementById("btn");
-
-	const clickHandle = (e) => {
-		let target = e.target;
-		let className = target.getAttribute('class');
-		let sign = target.getAttribute('sign');
-		let id = target.getAttribute('id');
-		if(className == 'box' && id && !sign){
-			let [x, y] = id.split('_')[1].split('-');
-			click(+x, +y)  //注意数据类型（坑）
+	//扫雷游戏
+	class SweepGame{
+		constructor(){
+			this.$root = document.getElementById('map');
+			this.$btn = document.getElementById('btn');
+			this.$btn.onclick = this.start.bind(this);
+			this.$root.oncontextmenu = (e) => e.preventDefault(); //禁用右键菜单
 		}
-	}
-
-	const rightClickHandle = (e) => {
-		if(e.button == 2){ //表示右击
+		map = []
+		level = 3
+		width = 30
+		height = 16
+		landmine = 90
+		//生成指定范围随机数
+		randomNum = (start, end) => {
+			let rg = end - start;
+			return Math.floor(Math.random() * rg) + start;
+		}
+		//边界检测
+		scanAround(x, y, cbfun){
+			//上/左上/右上
+			if(x - 1 >= 0){
+				cbfun(x - 1, y)		
+				if(y - 1 >= 0)
+					cbfun(x - 1, y - 1)
+				if(y + 1 < this.width)
+					cbfun(x - 1, y + 1)
+			}
+			//下/左下/右下
+			if(x + 1 < this.height){
+				cbfun(x + 1, y)	
+				if(y - 1 >= 0)
+					cbfun(x + 1, y - 1)
+				if(y + 1 < this.width)
+					cbfun(x + 1, y + 1)
+			}
+			//右
+			if(y + 1 < this.width)
+				cbfun(x, y + 1)	
+			//左
+			if(y - 1 >= 0)
+				cbfun(x, y - 1)	
+		}
+		//生成扫雷地图
+		generateSweepMap(w, h, landmine = 10){
+			for(let i = 0; i < h; i++){
+				let row = new Array(w).fill(0)
+				this.map.push(row);
+			}
+			this.generateLandmine(landmine);  //添加雷区
+			for(let x = 0; x < h; x++){
+				for(let y = 0; y < w; y++){
+					if(this.map[x][y] !== 'x')
+						this.scanAroundLandmineNum(x, y);
+				}
+			}
+		}
+		//随机放置地雷
+		generateLandmine(len){
+			let cache = new Set(); //去重
+			for(let i = 0; i < len; i++){
+				let x = this.randomNum(0, this.width);
+				let y = this.randomNum(0, this.height);
+				cache.add(`${x}${y}`);
+				if(cache.size == i + 1){
+					this.map[y][x] = 'x';
+				} else {
+					i -= 1;
+				}
+			}
+		}
+		//扫描各方格周围地雷数
+		scanAroundLandmineNum(x, y){
+			let sum = 0;
+			const cbfun = (x, y) => {
+				if(this.map[x][y] == 'x')
+					sum += 1;
+			}
+			this.scanAround(x, y, cbfun);
+			this.map[x][y] = sum;
+		}
+		//左击事件
+		leftClickHandle = (e) => {
 			let target = e.target;
 			let className = target.getAttribute('class');
+			let sign = target.getAttribute('sign');
 			let id = target.getAttribute('id');
-			if(className == 'box' && id){
-				let type = target.getAttribute('type');
-				let sign = target.getAttribute('sign');
-				num += type == 'x' ? (sign ? -1 : +1) : 0;
-				sign ? target.removeAttribute('sign') :
-					target.setAttribute('sign', '1');
-			}
-		}	
-	}
-
-	$map.oncontextmenu = (e) => e.preventDefault(); //禁用右键菜单
-	$btn.onclick = () => main();
-
-	const randomNum = (start, end) => {
-		let rg = end - start;
-		return Math.floor(Math.random() * rg) + start;
-	}
-
-	//随机生成雷区
-	const generateLandMine = (len, map, w, h) => {
-		let cache = new Set(); //去重
-		for(let i = 0; i < len; i++){
-			let x = randomNum(0, w);
-			let y = randomNum(0, h);
-			cache.add(`${x}${y}`);
-			if(cache.size == i + 1){
-				map[y][x] = 'x';
-			} else {
-				i -= 1;
+			if(className == 'box' && id && !sign){
+				let [x, y] = id.split('_')[1].split('-');
+				this.judgement(+x, +y)  //注意数据类型（坑）
 			}
 		}
-		return map;
-	}
-
-	//扫描当前位置8个方向
-	const scanAround = (map, x, y) => {
-		let sum = 0;
-		//上/左上/右上
-		if(x - 1 >= 0){
-			if(map[x - 1][y] == 'x')
-				sum += 1
-			if(y - 1 >= 0 && map[x - 1][y - 1] == 'x')
-				sum += 1;
-			if(y + 1 < width && map[x - 1][y + 1] == 'x')
-				sum += 1;
+		//右击事件
+		rightClickHandle = (e) => {
+			if(e.button == 2){ //表示右击
+				let target = e.target;
+				let className = target.getAttribute('class');
+				let id = target.getAttribute('id');
+				if(className == 'box' && id){
+					let type = target.getAttribute('type');
+					let sign = target.getAttribute('sign');
+					//有标记 remove 无则 set
+					sign ? target.removeAttribute('sign') :
+						target.setAttribute('sign', '1');
+				}
+			}	
 		}
-		//下/左下/右下
-		if(x + 1 < height){
-			if(map[x + 1][y] == 'x')
-				sum += 1
-			if(y - 1 >= 0 && map[x + 1][y - 1] == 'x')
-				sum += 1;
-			if(y + 1 < width && map[x + 1][y + 1] == 'x')
-				sum += 1;
-		}
-		//右
-		if(y + 1 < width && map[x][y + 1] == 'x')
-			sum += 1;
-		//左
-		if(y - 1 >= 0 && map[x][y - 1] == 'x')
-			sum += 1;
-		map[x][y] = sum;
-	}
-
-	//生成扫雷地图
-	const generateGameMap = (w, h) => {
-		let map = [];
-		for(let i = 0; i < h; i++){
-			let row = new Array(w).fill(0)
-			map.push(row);
-		}
-		map = generateLandMine(landmine, map, w, h);  //添加雷区
-		for(let x = 0; x < h; x++){
-			for(let y = 0; y < w; y++){
-				if(map[x][y] !== 'x')
-					scanAround(map, x, y);
+		//游戏逻辑判断
+		judgement(x, y){
+			let $node = this.getNode(x, y);
+			if($node){
+				$node.removeAttribute('id');
+				let type = $node.getAttribute('type');
+				if(type == '0')
+					this.scanAroundClick(x, y);
+				else if(type == 'x')
+					this.over();
 			}
 		}
-		return map;
-	}
-
-
-	const main = () => {
-		let map = generateGameMap(width, height);
-		$map.innerHTML = render(map);
-		num = 0;
-		//绑定点击事件
-		$map.addEventListener('click', clickHandle);
-		$map.onmouseup = (e) => rightClickHandle(e)
-	}
-
-	const render = (map) => {
-		let html = '';
-		for(let i = 0; i < height; i++){
-			for(let j = 0; j < width; j++){
-				html += `<div class="box" id="box_${i}-${j}" type="${map[i][j]}"></div>`
+		//判断四周是否可点击
+		scanAroundClick(x, y){
+			const cbfun = (x, y) => {
+				if(this.getNode(x, y)){
+					this.judgement(x, y);
+				}
 			}
+			this.scanAround(x, y, cbfun);
 		}
-		return html;
-	}
-
-	const getNode = (x, y) => {
-		let id = `box_${x}-${y}`;
-		return document.getElementById(id);
-	}
-
-	//扫描当前位置8个方向是否可打开
-	const scanAroundClick = (x, y) => {
-		//上/左上/右上
-		if(x - 1 >= 0){
-			if(getNode(x - 1, y))
-				click(x - 1, y)		
-			if(y - 1 >= 0 && getNode(x - 1, y - 1))
-				click(x - 1, y - 1)
-			if(y + 1 < width && getNode(x - 1, y + 1))
-				click(x - 1, y + 1)
+		//获取点击节点
+		getNode(x, y){
+			let id = `box_${x}-${y}`;
+			return document.getElementById(id);
 		}
-		//下/左下/右下
-		if(x + 1 < height){
-			if(getNode(x + 1, y))
-				click(x + 1, y)
-			if(y - 1 >= 0 && getNode(x + 1, y - 1))
-				click(x + 1, y - 1)
-			if(y + 1 < width && getNode(x + 1, y + 1))
-				click(x + 1, y + 1)
+		//游戏开始
+		start(){
+			//绑定点击事件
+			const {width, height, landmine} = this;
+			this.map = []; //清空数据
+			this.generateSweepMap(width, height, landmine);
+			this.render();
+			this.$root.addEventListener('click', this.leftClickHandle);
+			this.$root.onmouseup = (e) => this.rightClickHandle(e);
 		}
-		//右
-		if(y + 1 < width && getNode(x, y + 1))
-			click(x, y + 1)	
-		//左
-		if(y - 1 >= 0 && getNode(x, y - 1))
-			click(x, y - 1)	
-	}
-
-	const click = (x, y) => {
-		let $node = getNode(x, y)
-		if($node){
-			$node.removeAttribute('id');
-			let type = $node.getAttribute('type');
-			if(type == '0')
-				scanAroundClick(x, y);
-			else if(type == 'x'){
-				$map.removeEventListener('click', clickHandle);
-				$map.onmouseup = null;
-				setTimeout(() => alert('游戏结束'), 15);
+		//游戏结束
+		over(){
+			this.$root.onmouseup = null;
+			this.$root.removeEventListener('click', this.leftClickHandle);
+			setTimeout(() => alert('游戏结束'), 15);
+		}
+		render(){
+			let html = '';
+			for(let i = 0; i < this.height; i++){
+				for(let j = 0; j < this.width; j++){
+					html += `<div class="box" id="box_${i}-${j}" type="${this.map[i][j]}"></div>`
+				}
 			}
+			this.$root.innerHTML = html;
 		}
 	}
 
-	const test = (x, y) => {
-		x = isNaN(x) ? randomNum(0, height) : x;
-		y = isNaN(y) ? randomNum(0, width) : y;
-		click(x, y)
-	}
+	new SweepGame();
+
 </script>
 </body>
 </html>
