@@ -1,0 +1,74 @@
+const randomNum = (start = 0, end = 1) => {
+	const range = end - start;
+	return start + Math.random() * range;
+}
+
+const generateList = (len = 100) => {
+	let arr = []
+	for(let i = 0; i < len; i++){
+		let num = Math.floor(randomNum(0, len * 10))
+		arr.push(num)
+	}
+	return arr;
+}
+
+//选择排序（时间复杂度：O(n^2)）
+const selectionSort = (list) => {
+	for(let i = 0; i < list.length; i++){
+		let idx = i, max = list[i];
+		for(let k = i; k < list.length; k++){
+			if(list[k] > max){
+				idx = k;
+				max = list[k]
+			}
+		}
+		[list[i], list[idx]] = [list[idx], list[i]]
+	}
+	return list;
+}
+
+//冒泡排序算法
+const bubbleSort = (list) => {
+	for(let i = 0; i < list.length; i++){
+		for(let k = 1; k < list.length; k++){
+			if(list[k] < list[k-1]){
+				[list[k], list[k-1]] = [list[k-1], list[k]]
+			}
+		}
+	}
+	return list;
+}
+
+//插入排序 （时间复杂度：O(n^2)）
+const insertionSort = (list) => {
+	for(let i = 0; i < list.length; i++){
+		for(let k = 0; k < i; k++){
+			if(list[k] > list[i]){
+				let [val] = list.splice(i, 1)
+				list.splice(k, 0, val)
+				break;
+			}
+		}
+	}
+	return list;
+}
+
+//快速排序
+const quickSort = (list) => {
+	let len = list.length;
+	if(len <= 1) 
+		return list;
+	let left = [], right = [], base = list[0];
+	for(let i = 1; i < len; i++){
+		if(list[i] < base)
+			left.push(list[i])
+		else
+			right.push(list[i])
+	}
+	return [].concat(quickSort(left), base, quickSort(right))
+}
+
+const testCase = () => {
+	let list = generateList(20)
+	return quickSort(list)
+}
