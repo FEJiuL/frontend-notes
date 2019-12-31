@@ -1,4 +1,4 @@
-//乐课支付集成支付组件化（可支持扩展其他支付方式）
+//集成支付组件化demo（可支持扩展其他支付方式），仅展示部分核心代码
 
 import React from 'react';
 import {
@@ -6,11 +6,9 @@ import {
     InputItem,
     WingBlank,
     View,
-    Toast
+    Toast,
+    Result
 } from 'antd-mobile';
-import {
-    LekeResult
-} from '../style';
 import {
     FormWrap,
     FormField,
@@ -48,7 +46,7 @@ const IntegratedPay = (component) => {
  * ==== 终端不支持展示 ====
  */
 const Nonsupport = () => {
-    return <LekeResult describe="请使用微信或支付宝扫一扫" />
+    return <Result describe="请使用微信或支付宝扫一扫" />
 }
 
 /**
@@ -57,29 +55,22 @@ const Nonsupport = () => {
 const AliPayPal = (Component) => {
 
     //支付宝支付完成回跳地址
-    const returnUrl = "https://webapp.leke.cn/leke-pay-h5/#/scanPay/result";
+    const returnUrl = "https://demo.example.cn/#/scanPay/result";
 
     //统一下单
     const createOrder = ({
         id,
-        parentName,
-        studentName,
-        studentClassName,
-        parentPhoneNumber,
-        amount: paymentAmount
+        remark,
+        amount
     }) => {
         Ajax({
-            url: "/pay/alipay/mobileSitePay/payStart.htm",
+            url: "/pay/alipay/payStart.htm",
             type: "POST"
         })
         .updateParams({
             id,
-            returnUrl,
-            parentName,
-            studentName,
-            studentClassName,
-            parentPhoneNumber,
-            paymentAmount
+            amount,
+            remark
         })
         .send()
         .then(({data, message}) => {
@@ -131,23 +122,17 @@ const WeChatPayPal = (Component) => {
     //统一下单
     const createOrder = ({
         id,
-        parentName,
-        studentName,
-        studentClassName,
-        parentPhoneNumber,
-        amount: paymentAmount
+        remark,
+        amount
     }) => {
         Ajax({
-            url: "/pay/wx/mobileSitePay/order/pay.htm",
+            url: "/pay/wx/order/pay.htm",
             type: "POST"
         })
         .updateParams({
             id,
-            parentName,
-            studentName,
-            paymentAmount,
-            studentClassName,
-            parentPhoneNumber
+            remark,
+            amount,
         })
         .send()
         .then(({ data, message }) => {
@@ -175,19 +160,13 @@ class Main extends React.PureComponent{
         const { 
             id,
             amount = 0, 
-            studentClassName,
-            parentPhoneNumber,
-            parentName,
-            studentName
+            remark
         } = this.state;
 
         this.props.payment({
             id,
             amount,
-            parentName,
-            studentName,
-            studentClassName,
-            parentPhoneNumber
+            remark
         })
     }
     render(){
