@@ -14,7 +14,7 @@ import {
     FormField,
     PaymentNoticeBar
 } from './style';
-import Ajax from '../../utils/ajax';
+import request from '@/utils/request';
 
 //获取用户终端类型
 const getUserAgent = () => {
@@ -63,16 +63,15 @@ const AliPayPal = (Component) => {
         remark,
         amount
     }) => {
-        Ajax({
-            url: "/pay/alipay/payStart.htm",
-            type: "POST"
+        request({
+            url: "/payment/alipay",
+            method: "POST",
+            data: {
+                id,
+                amount,
+                remark
+            }
         })
-        .updateParams({
-            id,
-            amount,
-            remark
-        })
-        .send()
         .then(({data, message}) => {
             if( data && data.payUrl ){
                 window.location.href = data.payUrl; //注： payUrl 中不带returnUrl支付结束后会直接关闭页面
@@ -125,16 +124,15 @@ const WeChatPayPal = (Component) => {
         remark,
         amount
     }) => {
-        Ajax({
-            url: "/pay/wx/order/pay.htm",
-            type: "POST"
+        request({
+            url: "/payment/wechatpay",
+            method: "POST",
+            data: {
+                id,
+                remark,
+                amount,
+            }
         })
-        .updateParams({
-            id,
-            remark,
-            amount,
-        })
-        .send()
         .then(({ data, message }) => {
             data ? payment(data) : Toast.fail(message);
         })
