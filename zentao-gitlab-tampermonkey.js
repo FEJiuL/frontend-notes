@@ -4,8 +4,8 @@
 // @version      0.1
 // @description  try to take over the world!
 // @author       You
-// @match        https://zentao.example.com/build-view-*.html
-// @icon         https://zentao.example.com/favicon.ico
+// @match        https://zentao.babycare.com/build-view-*.html
+// @icon         https://zentao.babycare.com/favicon.ico
 // @grant        GM_xmlhttpRequest
 // @grant        GM_download
 // @grant        GM_openInTab
@@ -17,11 +17,16 @@
   const LogInfoStyle = "color: green";
   const LogWarnStyle = "color: #ff9800";
   const LogErrorStyle = "color: red";
-  // gitlab请求封装
+
+  /**
+   * == gitlab请求封装 ==
+   * @param param0
+   * @returns
+   */
   const Gitlab_xmlhttpRequest = ({ url, method = "GET" }) =>
     new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
-        url: `http://gitlab.example.com/api/v4` + url,
+        url: `http://gitlab.babycare.com/api/v4` + url,
         method,
         headers: {
           "PRIVATE-TOKEN": Gitlab_Token,
@@ -35,7 +40,12 @@
         },
       });
     });
-  // 获取gitlab项目详情
+
+  /**
+   * == 获取gitlab项目详情 ==
+   * @param payload
+   * @returns
+   */
   function getProjectByName(payload) {
     let { pname = "" } = payload;
     return Gitlab_xmlhttpRequest({
@@ -59,7 +69,12 @@
       }
     });
   }
-  // 获取任务分支信息
+
+  /**
+   * == 获取任务分支信息 ==
+   * @param payload
+   * @returns
+   */
   function getBranchList(payload) {
     return Gitlab_xmlhttpRequest({
       url: `/projects/${payload.pid}/repository/branches?per_page=100&search=task-`,
@@ -79,7 +94,12 @@
       }
     });
   }
-  // 创建分支
+
+  /**
+   * == 创建分支 ==
+   * @param payload
+   * @returns
+   */
   function createBranch(payload) {
     return Gitlab_xmlhttpRequest({
       url: `/projects/${payload.pid}/repository/branches?branch=${payload.buildId}&ref=master`,
@@ -99,7 +119,12 @@
         });
       });
   }
-  // 提交mr
+
+  /**
+   * == 提交mr ==
+   * @param payload
+   * @returns
+   */
   function submitMR(payload) {
     const { demand, branch_list, buildId, pid, statistics } = payload;
     let arr = branch_list.reduce((arr, { name = "" }) => {
@@ -133,8 +158,13 @@
     }, []);
     return Promise.allSettled(arr).then(() => payload);
   }
-  // 获取打开的mr
-  // @todo 这里可能需要设置下延时获取（提交mr后检查冲突还需要点时间）
+
+  /**
+   * == 获取打开的mr ==
+   * @param payload
+   * @returns
+   * @todo 这里可能需要设置下延时获取（提交mr后检查冲突还需要点时间）
+   */
   function getOpenedMR(payload) {
     // 设置3s延时
     return new Promise((resolve, reject) => {
@@ -164,8 +194,13 @@
       }, 2000);
     });
   }
-  // 接受mr
-  // @todo 合并要串行执行，不然容易出现合并冲突问题
+
+  /**
+   * == 接受mr ==
+   * @param payload
+   * @returns
+   * @todo 合并要串行执行，不然容易出现合并冲突问题
+   */
   function acceptMR(payload) {
     let unmerged = [],
       promise = Promise.resolve();
@@ -173,7 +208,7 @@
     while (list.length > 0) {
       let item = list.shift();
       // 标记可合并的提交自动合并
-      // 这里使用串行执行，每个任务间隔1s执行为了给合并后代码重新checking，时间可根据checking市场调整
+      // 这里使用串行执行，每个任务间隔1s执行为了给合并后代码重新checking，时间可根据checking时长调整
       if ("can_be_merged" === item.merge_status) {
         promise = promise.then(
           () =>
@@ -243,7 +278,12 @@
       return payload;
     });
   }
-  // 关闭mr
+
+  /**
+   * == 关闭mr ==
+   * @param payload
+   * @returns
+   */
   function closeMR(payload) {
     const { opened_mr: list, pid } = payload;
     const arr = list.reduce((arr, item) => {
@@ -264,6 +304,8 @@
     }, []);
     return Promise.allSettled(arr);
   }
+
+
   // 页面添加一键关联按钮
   var $target = $("#stories .actions")[0];
   var $btn = $(
