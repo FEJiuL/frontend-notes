@@ -36,12 +36,13 @@ var solveSudoku = function (board) {
   while (s != blank.length) {
     s = blank.length;
     for (let i = 0; i < blank.length; i++) {
-      const [x, y, z, set = new Set()] = blank[i];
+      let set = new Set();
+      const [x, y, z] = blank[i];
       for (v = 1; v <= 9; v++) {
         let val = v.toString();
         // 存在则跳过
         if (m.row[x].has(val) || m.col[y].has(val) || m.grid[z].has(val))
-          set.delete(val);
+          continue;
         else set.add(val);
       }
       // 判断是否取到唯一解
@@ -54,9 +55,9 @@ var solveSudoku = function (board) {
         // 有解移除空白节点
         blank.splice(i, 1);
         i -= 1;
-      } else blank[i].set = set;
+      }
     }
   }
-
+  if (s > 0) return "未找到最优解";
   return board;
 };
