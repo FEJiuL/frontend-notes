@@ -1,0 +1,14 @@
+
+// 数字转中文大写
+function numberConvertToUppercase(num){
+    let unit = "拾佰仟万拾佰仟亿拾佰仟";
+    let key = "零壹贰叁肆伍陆柒捌玖";
+    let str = "";
+    let m = -1;
+    while (num > 0) {
+      let n = num % 10;
+      num = (num / 10) | 0;
+      str = key[n] + (unit[m++] ?? "") + str;
+    }
+    return str.replace(/(零(仟|佰|拾))+/g, "零").replace(/零+$/, "");
+}
