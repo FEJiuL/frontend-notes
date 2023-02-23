@@ -1,7 +1,6 @@
 /**
-* == vuex action 批量拆查询缓存（抽象伪代码） ==
+* == vuex action 批量查询缓存（抽象伪代码） ==
 */
-
 function queryDataBatch(
     { state, commit },
     { module, keys = [], key, callback }
