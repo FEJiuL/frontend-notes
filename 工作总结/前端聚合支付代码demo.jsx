@@ -1,4 +1,4 @@
-//集成支付组件化demo（可支持扩展其他支付方式），仅展示部分核心代码
+//聚合支付组件化demo（可支持扩展其他支付方式）
 
 import React from 'react';
 import {
