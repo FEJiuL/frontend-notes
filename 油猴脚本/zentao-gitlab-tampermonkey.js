@@ -4,8 +4,8 @@
 // @version      0.1
 // @description  try to take over the world!
 // @author       You
-// @match        https://zentao.babycare.com/build-view-*.html
-// @icon         https://zentao.babycare.com/favicon.ico
+// @match        https://zentao.xxx.com/build-view-*.html
+// @icon         https://zentao.xxx.com/favicon.ico
 // @grant        GM_xmlhttpRequest
 // @grant        GM_download
 // @grant        GM_openInTab
@@ -26,7 +26,7 @@
   const Gitlab_xmlhttpRequest = ({ url, method = "GET" }) =>
     new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
-        url: `http://gitlab.babycare.com/api/v4` + url,
+        url: `http://gitlab.xxx.com/api/v4` + url,
         method,
         headers: {
           "PRIVATE-TOKEN": Gitlab_Token,
